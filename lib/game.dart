@@ -3,8 +3,8 @@ import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
 import 'package:flame/gestures.dart';
-import 'package:geekle_workshop/background.dart';
 
+import 'background.dart';
 import 'player.dart';
 
 class GeekleGame extends BaseGame with TapDetector {
