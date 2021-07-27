@@ -1,31 +1,24 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
-import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
 import 'package:flame/gestures.dart';
+import 'package:geekle_workshop/obstacle.dart';
 
 import 'background.dart';
 import 'player.dart';
 
-class GeekleGame extends BaseGame with TapDetector {
+class GeekleGame extends BaseGame with TapDetector, HasCollidables {
   late PlayerComponent player;
+  late TextComponent scoreText;
+  final initialScoreText = 'Score: ';
+  double obstacleSpeed = 500.0;
+  double timeSinceObstacle = 0.0;
+  double timePassed = 0.0;
 
   @override
   Future<void> onLoad() async {
-    final sprite = await Sprite.load('ember.png');
-    final playerSize = Vector2.all(64.0);
-
-    // [size] used here is the size of the game
-    final playerPosition = Vector2(playerSize.x * 2, size.y / 2);
-    player = PlayerComponent(
-      position: playerPosition,
-      size: playerSize,
-      sprite: sprite,
-    );
-
-    // Add all your initial components to the game
-    add(BackgroundComponent());
-    add(player);
+    addInitialComponents();
   }
 
   @override
@@ -36,8 +29,28 @@ class GeekleGame extends BaseGame with TapDetector {
   @override
   void update(double dt) {
     super.update(dt);
-    // TODO: dt is the time passed (in seconds) since the last time update ran.
-    // Here you want to add obstacles or enemies when you think enough time has
-    // passed or at random.
+    timeSinceObstacle += dt;
+    timePassed += dt;
+    if (timeSinceObstacle > max(10.0 - timePassed / 10, 0.5)) {
+      add(ObstacleComponent());
+      timeSinceObstacle = 0;
+    }
+    scoreText.text = '$initialScoreText${timePassed.toInt()}';
+  }
+
+  void addInitialComponents() {
+    player = PlayerComponent();
+    scoreText = TextComponent(initialScoreText, position: Vector2.all(20));
+    add(BackgroundComponent());
+    add(player);
+    add(ScreenCollidable());
+    add(scoreText);
+  }
+
+  void restart() {
+    timePassed = 0;
+    timeSinceObstacle = 0;
+    components.clear();
+    addInitialComponents();
   }
 }

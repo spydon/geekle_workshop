@@ -6,7 +6,7 @@ import 'package:geekle_workshop/game.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Flame.device.fullScreen();
-  await Flame.device.setPortrait();
+  await Flame.device.setLandscape();
 
   runApp(GameWidget(
     game: GeekleGame(),

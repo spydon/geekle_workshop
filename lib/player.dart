@@ -1,18 +1,31 @@
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
+import 'package:flame/geometry.dart';
 import 'package:flutter/animation.dart';
+import 'package:geekle_workshop/game.dart';
 
-class PlayerComponent extends SpriteComponent {
-  static const double downSpeed = 200.0;
+class PlayerComponent extends SpriteAnimationComponent
+    with HasGameRef<GeekleGame>, Hitbox, Collidable {
+  static const double downSpeed = 500.0;
 
-  PlayerComponent({
-    required Vector2 position,
-    required Vector2 size,
-    required Sprite sprite,
-  }) : super(position: position, size: size, sprite: sprite) {
+  PlayerComponent() : super(size: Vector2.all(64)) {
     // A centered anchor means that the position is defined from the center of
     // the component instead of from top left which is the default.
     anchor = Anchor.center;
+    addShape(HitboxCircle());
+  }
+
+  @override
+  Future<void> onLoad() async {
+    position = Vector2(size.x * 2, gameRef.size.y / 2);
+    animation = await gameRef.loadSpriteAnimation(
+      'ember_animated.png',
+      SpriteAnimationData.sequenced(
+        amount: 3,
+        textureSize: Vector2.all(16),
+        stepTime: 0.15,
+      ),
+    );
   }
 
   MoveEffect? _currentEffect;
@@ -25,8 +38,8 @@ class PlayerComponent extends SpriteComponent {
       removeEffect(_currentEffect!);
     }
     _currentEffect = MoveEffect(
-      path: [Vector2(0, -60.0)],
-      speed: 300,
+      path: [Vector2(0, -100.0)],
+      speed: 600,
       curve: Curves.ease,
       isRelative: true,
       isAlternating: true,
@@ -40,5 +53,11 @@ class PlayerComponent extends SpriteComponent {
     if (effects.isEmpty) {
       position.y += dt * downSpeed;
     }
+  }
+
+  @override
+  void onCollision(Set<Vector2> intersectionPoints, Collidable other) {
+    super.onCollision(intersectionPoints, other);
+    gameRef.restart();
   }
 }
